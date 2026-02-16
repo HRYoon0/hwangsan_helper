@@ -1,0 +1,376 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>2026 황산초 통합 도우미</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
+      background: #f0f4f8;
+      background-image:
+        radial-gradient(ellipse at 20% 0%, #fde8ef 0%, transparent 50%),
+        radial-gradient(ellipse at 80% 0%, #dbeafe 0%, transparent 50%),
+        radial-gradient(ellipse at 50% 100%, #e0f2e9 0%, transparent 50%);
+      min-height: 100vh;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      padding: 40px 20px;
+    }
+
+    .container {
+      width: 100%;
+      max-width: 900px;
+    }
+
+    /* 2열 레이아웃 */
+    .columns {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 60px;
+      align-items: start;
+    }
+
+    /* 헤더 */
+    .header {
+      text-align: center;
+      margin-bottom: 32px;
+      animation: fadeDown 0.6s ease-out;
+    }
+
+    .header h1 {
+      font-size: 28px;
+      font-weight: 800;
+      color: #2d3748;
+      letter-spacing: -0.5px;
+    }
+
+    .header .subtitle {
+      margin-top: 8px;
+      font-size: 14px;
+      color: #8e9aaf;
+      font-weight: 400;
+    }
+
+    /* 카테고리 섹션 */
+    .category {
+      margin-bottom: 24px;
+      animation: fadeUp 0.5s ease-out both;
+    }
+
+    .category:nth-child(1) { animation-delay: 0.1s; }
+    .category:nth-child(2) { animation-delay: 0.2s; }
+    .category:nth-child(3) { animation-delay: 0.3s; }
+    .category:nth-child(4) { animation-delay: 0.4s; }
+
+    .category-title {
+      font-size: 12px;
+      font-weight: 700;
+      color: #9aa5b4;
+      text-transform: uppercase;
+      letter-spacing: 1.5px;
+      margin-bottom: 10px;
+      padding-left: 4px;
+    }
+
+    .card-group {
+      background: #fff;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 16px rgba(0,0,0,0.05);
+      border: 1px solid rgba(0,0,0,0.04);
+    }
+
+    /* 링크 카드 */
+    .link-card {
+      display: flex;
+      align-items: center;
+      padding: 16px 20px;
+      text-decoration: none;
+      color: #1a1a2e;
+      transition: background 0.2s ease;
+      cursor: pointer;
+      border-bottom: 1px solid rgba(0,0,0,0.05);
+    }
+
+    .link-card:last-child {
+      border-bottom: none;
+    }
+
+    .link-card:hover {
+      background: #f8fafc;
+    }
+
+    .link-card:active {
+      background: #f1f5f9;
+    }
+
+    .link-icon {
+      width: 42px;
+      height: 42px;
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 20px;
+      flex-shrink: 0;
+      margin-right: 14px;
+    }
+
+    .link-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .link-title {
+      font-size: 15px;
+      font-weight: 600;
+      color: #1a1a2e;
+      line-height: 1.3;
+    }
+
+    .link-desc {
+      font-size: 12px;
+      color: #888;
+      margin-top: 2px;
+    }
+
+    .link-arrow {
+      color: #ccc;
+      font-size: 18px;
+      margin-left: 8px;
+      flex-shrink: 0;
+      transition: transform 0.2s ease;
+    }
+
+    .link-card:hover .link-arrow {
+      transform: translateX(3px);
+      color: #7eb8da;
+    }
+
+    /* 아이콘 배경색 - 파스텔 톤 */
+    .icon-blue    { background: #dbeafe; color: #5b8db8; }
+    .icon-green   { background: #d5f5e3; color: #6dba8a; }
+    .icon-orange  { background: #fef3c7; color: #d4a04a; }
+    .icon-purple  { background: #ede9fe; color: #9a8abf; }
+    .icon-pink    { background: #fce7f3; color: #d4789c; }
+    .icon-teal    { background: #ccfbf1; color: #5bb5a2; }
+
+    /* 푸터 */
+    .footer {
+      text-align: center;
+      margin-top: 32px;
+      padding-bottom: 20px;
+      animation: fadeUp 0.5s ease-out 0.5s both;
+    }
+
+    .footer p {
+      font-size: 12px;
+      color: #b0bac9;
+    }
+
+    /* 애니메이션 */
+    @keyframes fadeDown {
+      from { opacity: 0; transform: translateY(-20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* 반응형 */
+    @media (max-width: 700px) {
+      .columns { grid-template-columns: 1fr; }
+    }
+
+    @media (max-width: 480px) {
+      body { padding: 24px 16px; }
+      .header h1 { font-size: 24px; }
+      .link-card { padding: 14px 16px; }
+      .link-icon { width: 38px; height: 38px; font-size: 18px; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <div class="header">
+      <h1>📘 2026 황산초 통합 도우미</h1>
+      <p class="subtitle">선생님들을 위한 바로가기 모음</p>
+    </div>
+    <div id="app" class="columns">
+      <div id="col-left"></div>
+      <div id="col-right"></div>
+    </div>
+    <div class="footer">
+      <p>© 2026 황산초등학교</p>
+    </div>
+  </div>
+
+  <script>
+    // ============================================
+    // ✏️ 링크 수정은 여기서만 하세요!
+    // url: 이동할 주소 / title: 제목 / desc: 설명
+    // icon: 이모지 / color: icon-blue, icon-green,
+    //        icon-orange, icon-purple, icon-red, icon-teal
+    // ============================================
+
+    const linkData = [
+      {
+        column: "left",
+        category: "업무 계획",
+        items: [
+          {
+            icon: "📅", color: "icon-blue",
+            title: "월간·주간 업무 추진 계획",
+            desc: "월간 및 주간 업무 일정",
+            url: "https://docs.google.com/spreadsheets/d/1Z9Jz5F3SMXNHRQIaXrTsGS-B5tiUSKanc2pGdfCrVUY/edit?gid=871031231#gid=871031231"
+          },
+          {
+            icon: "🕐", color: "icon-purple",
+            title: "전체 시간표",
+            desc: "전체 및 학년별 시간표",
+            url: "https://docs.google.com/spreadsheets/d/1V6EnwrMEAEcPbw-hurDb-uT0crM1h7Sw4pLHYU-jHtw/edit?gid=304604593#gid=304604593"
+          },
+          {
+            icon: "🏫", color: "icon-green",
+            title: "학교 현황",
+            desc: "황산초 현황 안내",
+            url: "https://docs.google.com/spreadsheets/d/1TRSV5PZ9W30r0OZx7li088SpvFmQ9IovTq5CzVQREE8/edit?gid=1057386445#gid=1057386445"
+          },
+          {
+            icon: "💬", color: "icon-pink",
+            title: "교직원 회의",
+            desc: "회의 안건 및 기록",
+            url: "https://docs.google.com/spreadsheets/d/1gH1vLh94q_YGllvio1M0zLl7bPZzcFOlmdD_v2_nudM/edit?gid=0#gid=0"
+          }
+        ]
+      },
+      {
+        column: "left",
+        category: "시설 예약",
+        items: [
+          {
+            icon: "🚪", color: "icon-blue",
+            title: "다목적실 사용 시간표",
+            desc: "시간대별 예약 현황",
+            url: "https://docs.google.com/spreadsheets/d/1tGRwJwcLHouTwAmcve9fm4pp9eexsjlDlWMilHuFPcs/edit?gid=749025978#gid=749025978"
+          },
+          {
+            icon: "💻", color: "icon-purple",
+            title: "컴퓨터실 사용 시간표",
+            desc: "시간대별 예약 현황",
+            url: "https://docs.google.com/spreadsheets/d/14opBcBDqTajifwv_wXWqFyulByxFIv7VP_6KvQ86VFI/edit?gid=749025978#gid=749025978"
+          }
+        ]
+      },
+      {
+        column: "right",
+        category: "업무 도구",
+        items: [
+          {
+            icon: "🔑", color: "icon-orange",
+            title: "결재 경로 및 품의 사이트 ID/PW",
+            desc: "결재 경로 및 계정 정보 안내",
+            url: "https://docs.google.com/spreadsheets/d/1b60zm6fm4zLmUiT9Wq_BfVC5vQ0IYYw9T8g38JpW7OQ/edit?gid=0#gid=0"
+          }
+        ]
+      },
+      {
+        column: "right",
+        category: "자주 쓰는 사이트",
+        items: [
+          {
+            icon: "👨‍🏫", color: "icon-blue",
+            title: "하이클래스",
+            desc: "학급 소통 플랫폼",
+            url: "https://www.hiclass.net/"
+          },
+          {
+            icon: "📢", color: "icon-pink",
+            title: "키즈콜",
+            desc: "학생 안전 귀가 서비스",
+            url: "https://shsms.co.kr/login"
+          },
+          {
+            icon: "🏫", color: "icon-green",
+            title: "황산초등학교 홈페이지",
+            desc: "학교 공식 사이트",
+            url: "https://hwangsan-p.gne.go.kr/hwangsan-p/main.do"
+          },
+          {
+            icon: "🎓", color: "icon-purple",
+            title: "경남교육 연수포털",
+            desc: "교사 연수 신청",
+            url: "https://www.gneti.or.kr/"
+          },
+          {
+            icon: "📚", color: "icon-teal",
+            title: "중앙교육연수원",
+            desc: "교원 원격 연수",
+            url: "https://www.neti.go.kr/"
+          }
+        ]
+      }
+    ];
+
+    // 렌더링 - 안전한 DOM 메서드 사용
+    var colLeft = document.getElementById("col-left");
+    var colRight = document.getElementById("col-right");
+
+    function createEl(tag, className, textContent) {
+      var el = document.createElement(tag);
+      if (className) el.className = className;
+      if (textContent) el.textContent = textContent;
+      return el;
+    }
+
+    linkData.forEach(function(section) {
+      var cat = createEl("div", "category");
+      cat.appendChild(createEl("div", "category-title", section.category));
+
+      var group = createEl("div", "card-group");
+
+      section.items.forEach(function(item) {
+        var a = document.createElement("a");
+        a.className = "link-card";
+        a.href = item.url;
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
+
+        a.appendChild(createEl("div", "link-icon " + item.color, item.icon));
+
+        var info = createEl("div", "link-info");
+        info.appendChild(createEl("div", "link-title", item.title));
+        if (item.desc) {
+          info.appendChild(createEl("div", "link-desc", item.desc));
+        }
+        a.appendChild(info);
+
+        a.appendChild(createEl("div", "link-arrow", "›"));
+
+        group.appendChild(a);
+      });
+
+      cat.appendChild(group);
+
+      // 좌/우 컬럼 분배
+      if (section.column === "right") {
+        colRight.appendChild(cat);
+      } else {
+        colLeft.appendChild(cat);
+      }
+    });
+  </script>
+
+</body>
+</html>
