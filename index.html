@@ -11,7 +11,7 @@
       box-sizing: border-box;
     }
 
-    body {
+body {
       font-family: 'Apple SD Gothic Neo', 'Noto Sans KR', -apple-system, sans-serif;
       background: #f0f4f8;
       background-image:
@@ -27,15 +27,21 @@
 
     .container {
       width: 100%;
-      max-width: 900px;
+      max-width: 1100px;
     }
 
-    /* 2열 레이아웃 */
+    /* 3열 레이아웃 */
     .columns {
       display: grid;
-      grid-template-columns: 1fr 1fr;
-      gap: 60px;
+      grid-template-columns: 1fr 1fr 1fr;
+      gap: 32px;
       align-items: start;
+    }
+
+    .column {
+      display: flex;
+      flex-direction: column;
+      gap: 24px;
     }
 
     /* 헤더 */
@@ -61,14 +67,12 @@
 
     /* 카테고리 섹션 */
     .category {
-      margin-bottom: 24px;
       animation: fadeUp 0.5s ease-out both;
     }
 
-    .category:nth-child(1) { animation-delay: 0.1s; }
-    .category:nth-child(2) { animation-delay: 0.2s; }
-    .category:nth-child(3) { animation-delay: 0.3s; }
-    .category:nth-child(4) { animation-delay: 0.4s; }
+    .column:nth-child(1) .category { animation-delay: 0.1s; }
+    .column:nth-child(2) .category { animation-delay: 0.2s; }
+    .column:nth-child(3) .category { animation-delay: 0.3s; }
 
     .category-title {
       font-size: 12px;
@@ -187,8 +191,72 @@
       to   { opacity: 1; transform: translateY(0); }
     }
 
+    /* 모달 */
+    .modal-overlay {
+      display: none;
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(0,0,0,0.7);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+      padding: 24px;
+    }
+
+    .modal-overlay.active {
+      display: flex;
+    }
+
+    .modal-content {
+      background: #fff;
+      border-radius: 16px;
+      max-width: 900px;
+      width: 100%;
+      max-height: 90vh;
+      overflow-y: auto;
+      padding: 24px;
+      position: relative;
+    }
+
+    .modal-close {
+      position: absolute;
+      top: 12px;
+      right: 16px;
+      background: none;
+      border: none;
+      font-size: 24px;
+      cursor: pointer;
+      color: #999;
+      padding: 4px 8px;
+      border-radius: 8px;
+    }
+
+    .modal-close:hover {
+      background: #f1f5f9;
+      color: #333;
+    }
+
+    .modal-title {
+      font-size: 18px;
+      font-weight: 700;
+      color: #2d3748;
+      margin-bottom: 16px;
+    }
+
+    .modal-images {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+    }
+
+    .modal-images img {
+      width: 100%;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+    }
+
     /* 반응형 */
-    @media (max-width: 700px) {
+    @media (max-width: 900px) {
       .columns { grid-template-columns: 1fr; }
     }
 
@@ -208,8 +276,16 @@
       <p class="subtitle">선생님들을 위한 바로가기 모음</p>
     </div>
     <div id="app" class="columns">
-      <div id="col-left"></div>
-      <div id="col-right"></div>
+      <div id="col-1" class="column"></div>
+      <div id="col-2" class="column"></div>
+      <div id="col-3" class="column"></div>
+    </div>
+    <div id="modal" class="modal-overlay">
+      <div class="modal-content">
+        <button class="modal-close" id="modal-close" type="button">&times;</button>
+        <div class="modal-title" id="modal-title"></div>
+        <div class="modal-images" id="modal-images"></div>
+      </div>
     </div>
     <div class="footer">
       <p>© 2026 황산초등학교</p>
@@ -224,121 +300,67 @@
     //        icon-orange, icon-purple, icon-red, icon-teal
     // ============================================
 
-    const linkData = [
-      {
-        column: "left",
-        category: "업무 계획",
-        items: [
-          {
-            icon: "📅", color: "icon-blue",
-            title: "월간·주간 업무 추진 계획",
-            desc: "월간 및 주간 업무 일정",
-            url: "https://docs.google.com/spreadsheets/d/1Z9Jz5F3SMXNHRQIaXrTsGS-B5tiUSKanc2pGdfCrVUY/edit?gid=871031231#gid=871031231"
-          },
-          {
-            icon: "🕐", color: "icon-purple",
-            title: "전체 시간표",
-            desc: "전체 및 학년별 시간표",
-            url: "https://docs.google.com/spreadsheets/d/1V6EnwrMEAEcPbw-hurDb-uT0crM1h7Sw4pLHYU-jHtw/edit?gid=304604593#gid=304604593"
-          },
-          {
-            icon: "🏫", color: "icon-green",
-            title: "학교 현황",
-            desc: "황산초 현황 안내",
-            url: "https://docs.google.com/spreadsheets/d/1TRSV5PZ9W30r0OZx7li088SpvFmQ9IovTq5CzVQREE8/edit?gid=1057386445#gid=1057386445"
-          },
-          {
-            icon: "💬", color: "icon-pink",
-            title: "교직원 회의",
-            desc: "회의 안건 및 기록",
-            url: "https://docs.google.com/spreadsheets/d/1gH1vLh94q_YGllvio1M0zLl7bPZzcFOlmdD_v2_nudM/edit?gid=0#gid=0"
-          }
-        ]
-      },
-      {
-        column: "left",
-        category: "시설 예약",
-        items: [
-          {
-            icon: "🚪", color: "icon-blue",
-            title: "다목적실 사용 시간표",
-            desc: "시간대별 예약 현황",
-            url: "https://docs.google.com/spreadsheets/d/1tGRwJwcLHouTwAmcve9fm4pp9eexsjlDlWMilHuFPcs/edit?gid=749025978#gid=749025978"
-          },
-          {
-            icon: "🚪", color: "icon-teal",
-            title: "특별실 사용 시간표",
-            desc: "시간대별 예약 현황",
-            url: "https://docs.google.com/spreadsheets/d/1jaO6tGsTKtPqwGlRWF1zXcEtmUPa-HcxPsa4SAEYzlU/edit?usp=sharing"
-          },
-          {
-            icon: "💻", color: "icon-purple",
-            title: "컴퓨터실 사용 시간표",
-            desc: "시간대별 예약 현황",
-            url: "https://docs.google.com/spreadsheets/d/14opBcBDqTajifwv_wXWqFyulByxFIv7VP_6KvQ86VFI/edit?gid=749025978#gid=749025978"
-          }
-        ]
-      },
-      {
-        column: "right",
-        category: "업무 도구",
-        items: [
-          {
-            icon: "🔑", color: "icon-orange",
-            title: "결재 경로 및 품의 사이트 ID/PW",
-            desc: "결재 경로 및 계정 정보 안내",
-            url: "https://docs.google.com/spreadsheets/d/1b60zm6fm4zLmUiT9Wq_BfVC5vQ0IYYw9T8g38JpW7OQ/edit?gid=0#gid=0"
-          },
-          {
-            icon: "📋", color: "icon-teal",
-            title: "경상남도교육청 학교업무 도움자료",
-            desc: "업무 참고 자료 모음",
-            url: "https://hryoon0.github.io/helppage/"
-          }
-        ]
-      },
-      {
-        column: "right",
-        category: "자주 쓰는 사이트",
-        items: [
-          {
-            icon: "🏫", color: "icon-green",
-            title: "황산초등학교 홈페이지",
-            desc: "학교 공식 사이트",
-            url: "https://hwangsan-p.gne.go.kr/hwangsan-p/main.do"
-          },
-          {
-            icon: "👨‍🏫", color: "icon-blue",
-            title: "하이클래스",
-            desc: "학급 소통 플랫폼",
-            url: "https://www.hiclass.net/"
-          },
-          {
-            icon: "📢", color: "icon-pink",
-            title: "키즈콜",
-            desc: "학생 안전 귀가 서비스",
-            url: "https://shsms.co.kr/login"
-          },
-          {
-            icon: "🎓", color: "icon-purple",
-            title: "경남교육 연수포털",
-            desc: "교사 연수 신청",
-            url: "https://www.gneti.or.kr/"
-          },
-          {
-            icon: "📚", color: "icon-teal",
-            title: "중앙교육연수원",
-            desc: "교원 원격 연수",
-            url: "https://www.neti.go.kr/"
-          }
-        ]
-      }
+    // ============================================
+    // ✏️ 링크 수정은 여기서만 하세요!
+    // columns[0] = 1열, columns[1] = 2열, columns[2] = 3열
+    // ============================================
+
+    var columns = [
+      // --- 1열: 업무 계획 + 업무 도구 ---
+      [
+        {
+          category: "업무 계획",
+          items: [
+            { icon: "📅", color: "icon-blue", title: "월간·주간 업무 추진 계획", desc: "월간 및 주간 업무 일정", url: "https://docs.google.com/spreadsheets/d/1Z9Jz5F3SMXNHRQIaXrTsGS-B5tiUSKanc2pGdfCrVUY/edit?gid=871031231#gid=871031231" },
+            { icon: "🕐", color: "icon-purple", title: "전체 시간표", desc: "전체 및 학년별 시간표", url: "https://docs.google.com/spreadsheets/d/1V6EnwrMEAEcPbw-hurDb-uT0crM1h7Sw4pLHYU-jHtw/edit?gid=304604593#gid=304604593" },
+            { icon: "🏫", color: "icon-green", title: "학교 현황", desc: "황산초 현황 안내", url: "https://docs.google.com/spreadsheets/d/1TRSV5PZ9W30r0OZx7li088SpvFmQ9IovTq5CzVQREE8/edit?gid=1057386445#gid=1057386445" },
+            { icon: "💬", color: "icon-pink", title: "교직원 회의", desc: "회의 안건 및 기록", url: "https://docs.google.com/spreadsheets/d/1gH1vLh94q_YGllvio1M0zLl7bPZzcFOlmdD_v2_nudM/edit?gid=0#gid=0" }
+          ]
+        },
+        {
+          category: "업무 도구",
+          items: [
+            { icon: "🔑", color: "icon-orange", title: "결재 경로 및 품의 사이트 ID/PW", desc: "결재 경로 및 계정 정보 안내", url: "https://docs.google.com/spreadsheets/d/1b60zm6fm4zLmUiT9Wq_BfVC5vQ0IYYw9T8g38JpW7OQ/edit?gid=0#gid=0" },
+            { icon: "📋", color: "icon-teal", title: "경상남도교육청 학교업무 도움자료", desc: "업무 참고 자료 모음", url: "https://hryoon0.github.io/helppage/" }
+          ]
+        }
+      ],
+      // --- 2열: 편의 자료 + 시설 예약 ---
+      [
+        {
+          category: "편의 자료",
+          items: [
+            { icon: "👥", color: "icon-blue", title: "업무분장표", desc: "부서별 업무 분장 안내", images: ["https://lh3.googleusercontent.com/d/1mUZyfW1-FIoCID9Py7NFdLv7f82blz3d=w1200", "https://lh3.googleusercontent.com/d/1ypiY7UO9pE-OJPU0KGt_BDboELYlHGdL=w1200"] },
+            { icon: "🗺️", color: "icon-green", title: "학교안내도", desc: "교내 시설 배치도", images: ["https://lh3.googleusercontent.com/d/1r03PtOS8RlabJkmQ9sGsTd3crBtESiwX=w1200"] },
+            { icon: "📞", color: "icon-orange", title: "내선번호", desc: "교내 내선번호 안내", images: ["https://lh3.googleusercontent.com/d/1SnhX9w_Z0mfBD8NymkM_4KybTvukZ0xm=w1200"] },
+            { icon: "🏖️", color: "icon-pink", title: "장기재직휴가", desc: "장기재직휴가 수요조사", url: "https://docs.google.com/spreadsheets/d/1n9zhd3CCamLVeMGPdr3PK-H3Fu08m5EW9U3Jk5pT2XE/edit?usp=sharing" }
+          ]
+        },
+        {
+          category: "시설 예약",
+          items: [
+            { icon: "🚪", color: "icon-blue", title: "다목적실 사용 시간표", desc: "시간대별 예약 현황", url: "https://docs.google.com/spreadsheets/d/1tGRwJwcLHouTwAmcve9fm4pp9eexsjlDlWMilHuFPcs/edit?gid=749025978#gid=749025978" },
+            { icon: "🚪", color: "icon-teal", title: "특별실 사용 시간표", desc: "시간대별 예약 현황", url: "https://docs.google.com/spreadsheets/d/1jaO6tGsTKtPqwGlRWF1zXcEtmUPa-HcxPsa4SAEYzlU/edit?usp=sharing" },
+            { icon: "💻", color: "icon-purple", title: "컴퓨터실 사용 시간표", desc: "시간대별 예약 현황", url: "https://docs.google.com/spreadsheets/d/14opBcBDqTajifwv_wXWqFyulByxFIv7VP_6KvQ86VFI/edit?gid=749025978#gid=749025978" }
+          ]
+        }
+      ],
+      // --- 3열: 자주 쓰는 사이트 ---
+      [
+        {
+          category: "자주 쓰는 사이트",
+          items: [
+            { icon: "🏫", color: "icon-green", title: "황산초등학교 홈페이지", desc: "학교 공식 사이트", url: "https://hwangsan-p.gne.go.kr/hwangsan-p/main.do" },
+            { icon: "👨‍🏫", color: "icon-blue", title: "하이클래스", desc: "학급 소통 플랫폼", url: "https://www.hiclass.net/" },
+            { icon: "📢", color: "icon-pink", title: "키즈콜", desc: "학생 안전 귀가 서비스", url: "https://shsms.co.kr/login" },
+            { icon: "🎓", color: "icon-purple", title: "경남교육 연수포털", desc: "교사 연수 신청", url: "https://www.gneti.or.kr/" },
+            { icon: "📚", color: "icon-teal", title: "중앙교육연수원", desc: "교원 원격 연수", url: "https://www.neti.go.kr/" }
+          ]
+        }
+      ]
     ];
 
-    // 렌더링 - 안전한 DOM 메서드 사용
-    var colLeft = document.getElementById("col-left");
-    var colRight = document.getElementById("col-right");
-
+    // 렌더링
     function createEl(tag, className, textContent) {
       var el = document.createElement(tag);
       if (className) el.className = className;
@@ -346,41 +368,76 @@
       return el;
     }
 
-    linkData.forEach(function(section) {
+    function buildCategory(section) {
       var cat = createEl("div", "category");
       cat.appendChild(createEl("div", "category-title", section.category));
-
       var group = createEl("div", "card-group");
 
       section.items.forEach(function(item) {
-        var a = document.createElement("a");
-        a.className = "link-card";
-        a.href = item.url;
-        a.target = "_blank";
-        a.rel = "noopener noreferrer";
-
-        a.appendChild(createEl("div", "link-icon " + item.color, item.icon));
-
+        var el;
+        if (item.images) {
+          el = document.createElement("div");
+          el.className = "link-card";
+          el.setAttribute("data-images", JSON.stringify(item.images));
+          el.setAttribute("data-modal-title", item.title);
+          el.addEventListener("click", function() {
+            openModal(item.title, item.images);
+          });
+        } else {
+          el = document.createElement("a");
+          el.className = "link-card";
+          el.href = item.url;
+          el.target = "_blank";
+          el.rel = "noopener noreferrer";
+        }
+        el.appendChild(createEl("div", "link-icon " + item.color, item.icon));
         var info = createEl("div", "link-info");
         info.appendChild(createEl("div", "link-title", item.title));
-        if (item.desc) {
-          info.appendChild(createEl("div", "link-desc", item.desc));
-        }
-        a.appendChild(info);
-
-        a.appendChild(createEl("div", "link-arrow", "›"));
-
-        group.appendChild(a);
+        if (item.desc) info.appendChild(createEl("div", "link-desc", item.desc));
+        el.appendChild(info);
+        el.appendChild(createEl("div", "link-arrow", "›"));
+        group.appendChild(el);
       });
 
       cat.appendChild(group);
+      return cat;
+    }
 
-      // 좌/우 컬럼 분배
-      if (section.column === "right") {
-        colRight.appendChild(cat);
-      } else {
-        colLeft.appendChild(cat);
-      }
+    // 모달 기능
+    var modal = document.getElementById("modal");
+    var modalTitle = document.getElementById("modal-title");
+    var modalImages = document.getElementById("modal-images");
+    var modalClose = document.getElementById("modal-close");
+
+    function openModal(title, images) {
+      modalTitle.textContent = title;
+      modalImages.textContent = "";
+      images.forEach(function(src) {
+        var img = document.createElement("img");
+        img.src = src;
+        img.alt = title;
+        modalImages.appendChild(img);
+      });
+      modal.classList.add("active");
+      document.body.style.overflow = "hidden";
+    }
+
+    function closeModal() {
+      modal.classList.remove("active");
+      document.body.style.overflow = "";
+    }
+
+    modalClose.addEventListener("click", closeModal);
+
+    modal.addEventListener("click", function(e) {
+      if (e.target === modal) closeModal();
+    });
+
+    columns.forEach(function(col, i) {
+      var colEl = document.getElementById("col-" + (i + 1));
+      col.forEach(function(section) {
+        colEl.appendChild(buildCategory(section));
+      });
     });
   </script>
 
