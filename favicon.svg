@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32">
+  <!-- 일정 확인: 달력 + 체크 -->
+  <rect x="2.5" y="5.5" width="27" height="24" rx="4.5" fill="#1f6b4c"/>
+  <rect x="2.5" y="5.5" width="27" height="7" rx="4.5" fill="#164f39"/>
+  <rect x="9" y="2" width="3.4" height="7" rx="1.7" fill="#164f39"/>
+  <rect x="19.6" y="2" width="3.4" height="7" rx="1.7" fill="#164f39"/>
+  <path d="M10 21l4.2 4.2L23 16.4" fill="none" stroke="#ffffff"
+        stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"/>
+</svg>
