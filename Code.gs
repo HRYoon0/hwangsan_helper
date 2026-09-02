@@ -6,7 +6,7 @@
  *          (gviz 는 응답을 수 분간 캐시해서 시트에서 직접 고친 내용이 늦게 보인다.
  *           화면은 gviz 로 빠르게 그린 뒤, 이 doGet 결과로 조용히 교체한다.)
  *
- * 시트 구조: 월별 탭 안에서 [날짜 행] 바로 아래가 [일정 행]이고,
+ * 시트 구조: 월별 탭("3월"…"2월") 안에서 [날짜 행] 바로 아래가 [일정 행]이고,
  *            L~R 열(12~18)이 일~토. 한 칸 안에 줄바꿈으로 여러 일정이 쌓인다.
  *            0번 열(A)에는 그 주의 안내 사항이 통째로 들어 있다.
  *
@@ -20,13 +20,6 @@
  */
 
 var SPREADSHEET_ID = '1Z9Jz5F3SMXNHRQIaXrTsGS-B5tiUSKanc2pGdfCrVUY';
-
-// 월 → 시트 gid (index.html 의 PLAN_GID 와 같아야 한다)
-var PLAN_GID = {
-  3: 729567423,  4: 1654646122, 5: 1031912482, 6: 532035622,
-  7: 1631631776, 8: 405026740,  9: 1330298726, 10: 797668518,
-  11: 2043181475, 12: 540648356, 1: 1319523795, 2: 256244009
-};
 
 var SUN_COL = 12;      // L열 = 일요일 (1-indexed)
 var SCAN_RANGE = 40;   // 탭 위에서부터 훑을 행 수
@@ -116,10 +109,9 @@ function locate(ymd) {
   var parts = ymd.split('-');
   var target = new Date(+parts[0], +parts[1] - 1, +parts[2]);
 
-  var gid = PLAN_GID[target.getMonth() + 1];
-  if (!gid) throw new Error('해당 월의 시트를 찾을 수 없습니다.');
-
-  var title = sheetTitleByGid(gid);
+  // 탭은 "9월"처럼 월 이름으로 찾는다. gid 로 찾으면 누가 탭을 지우고
+  // 다시 만들 때마다 여기와 index.html 을 고쳐야 했다. (2026-09-02 실제 발생)
+  var title = (target.getMonth() + 1) + '월';
 
   // 날짜를 시리얼 숫자로 받아야 '일 숫자'와 확실히 구분된다
   var res = Sheets.Spreadsheets.Values.get(SPREADSHEET_ID, "'" + title + "'!A1:R" + SCAN_RANGE, {
@@ -173,22 +165,6 @@ function findDateRow(rows, target, col) {
 function toSerial(date) {
   var utc = Date.UTC(date.getFullYear(), date.getMonth(), date.getDate());
   return Math.round((utc - Date.UTC(1899, 11, 30)) / 86400000);
-}
-
-function sheetTitleByGid(gid) {
-  var key = 'title_' + gid;
-  var hit = cacheGet(key);
-  if (hit) return hit.title;
-
-  var meta = Sheets.Spreadsheets.get(SPREADSHEET_ID);
-  for (var i = 0; i < meta.sheets.length; i++) {
-    if (meta.sheets[i].properties.sheetId === gid) {
-      var title = meta.sheets[i].properties.title;
-      cachePut(key, { title: title }, 21600);   // 탭 이름은 잘 안 바뀐다 (6시간)
-      return title;
-    }
-  }
-  throw new Error('gid ' + gid + ' 탭이 없습니다.');
 }
 
 function colLetter(n) {

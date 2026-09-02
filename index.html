@@ -1035,9 +1035,12 @@
     // 시트는 월별 탭으로 나뉘고, 탭 안에서 "날짜 행 + 바로 아래 일정 행"이
     // 한 주씩 반복된다. 열 11~17 이 일~토.
     var PLAN_SHEET = "1Z9Jz5F3SMXNHRQIaXrTsGS-B5tiUSKanc2pGdfCrVUY";
+    // 탭 바로가기 링크에만 쓴다. 데이터 조회는 탭 이름("9월")으로 하므로
+    // 탭을 지우고 다시 만들어 gid 가 바뀌어도 일정 표시는 깨지지 않는다.
+    // (gid 가 낡으면 링크가 첫 탭으로 열릴 뿐이다)
     var PLAN_GID = {
       3: "729567423",  4: "1654646122", 5: "1031912482", 6: "532035622",
-      7: "1631631776", 8: "405026740",  9: "1330298726", 10: "797668518",
+      7: "1631631776", 8: "405026740",  9: "1000276254", 10: "797668518",
       11: "2043181475", 12: "540648356", 1: "1319523795", 2: "256244009"
     };
     var SUN_COL = 11;
@@ -1048,9 +1051,9 @@
     }
 
     // gviz 응답은 JSON 앞뒤로 콜백 껍데기가 붙어 온다
-    function gviz(gid) {
+    function gviz(sheetName) {
       var url = "https://docs.google.com/spreadsheets/d/" + PLAN_SHEET +
-                "/gviz/tq?tqx=out:json&headers=0&gid=" + gid;
+                "/gviz/tq?tqx=out:json&headers=0&sheet=" + encodeURIComponent(sheetName);
       var ctrl = new AbortController();
       var timer = setTimeout(function () { ctrl.abort(); }, 8000);
       return fetch(url, { signal: ctrl.signal })
@@ -1103,10 +1106,10 @@
     }
 
     function loadPlan() {
-      var gid = PLAN_GID[today.getMonth() + 1];
-      document.getElementById("plan-link").href = planUrl(gid);
+      var month = today.getMonth() + 1;
+      document.getElementById("plan-link").href = planUrl(PLAN_GID[month]);
 
-      return gviz(gid).then(function (data) {
+      return gviz(month + "월").then(function (data) {
         var rows = data.table.rows;
         var col = SUN_COL + today.getDay();
         var text = null, notice = null;
@@ -1148,7 +1151,7 @@
         }
 
         // gviz 가 보여준 내용을 기억해 뒀다가 최신본과 비교한다
-        shownPlan = (text || "") + " " + (notice || "");
+        shownPlan = (text || "") + "\u0000" + (notice || "");
         return renderPlan(text, notice);
       });
     }
@@ -1184,7 +1187,7 @@
 
       fetchJSON(url, 12000).then(function (data) {
         if (!data || !data.success) return;
-        var fresh = (data.text || "") + " " + (data.notice || "");
+        var fresh = (data.text || "") + "\u0000" + (data.notice || "");
         if (fresh === shownPlan) return;   // 이미 최신이면 건드리지 않는다
 
         shownPlan = fresh;
